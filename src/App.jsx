@@ -14,12 +14,13 @@ import FileSaver from 'file-saver';
 const items = [
   {
     label: 'Upload PDFs',
-    key: 'mail',
+    key: 'batch',
     icon: <MailOutlined />,
+    disabled: 'true'
   },
   {
-    label: 'Process a PDF',
-    key: 'app',
+    label: 'Process a file',
+    key: 'process',
     icon: <AppstoreOutlined />,
   },
 ]
@@ -79,9 +80,9 @@ const PdfUploader = () => {
         fileList={fileList}
         customRequest={handleUpload}
         onChange={({ fileList }) => setFileList(fileList)}
-        accept=".pdf"
+        accept=".pdf,.txt"
       >
-        <Button icon={<UploadOutlined />}>Upload PDF</Button>
+        <Button icon={<UploadOutlined />}>Upload File (PDF/TXT)</Button>
       </Upload>
       {
         extractedText && 
@@ -104,7 +105,7 @@ const PdfUploader = () => {
 
 function App() {
   const [count, setCount] = useState(0)
-  const [current, setCurrent] = useState('mail');
+  const [current, setCurrent] = useState('process');
   const onClick = (e) => {
     console.log('click ', e);
     setCurrent(e.key);
@@ -123,7 +124,7 @@ function App() {
       <h1>WIPJar</h1>
       <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
       {
-        current === 'mail' ? <ImageBrowser /> : <PdfUploader />
+        current === 'batch' ? <ImageBrowser /> : <PdfUploader />
       }
       
     </>
