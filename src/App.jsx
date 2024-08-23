@@ -24,6 +24,9 @@ const items = [
   },
 ]
 
+const BASE_URL = "https://cogins.azurewebsites.net"
+// const BASE_URL = "http://localhost:8000"
+
 const PdfUploader = () => {
   const [fileList, setFileList] = useState([]);
   const [extractedText, setExtractedText] = useState('');
@@ -35,7 +38,7 @@ const PdfUploader = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/extract_text/', formData, {
+      const response = await axios.post(BASE_URL+'/extract_text/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
