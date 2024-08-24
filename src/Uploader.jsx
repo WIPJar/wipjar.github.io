@@ -5,8 +5,8 @@ import { DataContext } from './models/DataContext';
 const { Dragger } = Upload;
 import axios from 'axios';
 
-// const BASE_URL = "https://cogins.azurewebsites.net"
-const BASE_URL = "http://localhost:8000"
+const BASE_URL = "https://cogins.azurewebsites.net"
+// const BASE_URL = "http://localhost:8000"
 
 const Uploader = ( ) => {
     const { wipjarData, setFetchRequested, 
