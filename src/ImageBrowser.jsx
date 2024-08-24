@@ -7,7 +7,7 @@ const items = new Array(15).fill(null).map((_, index) => ({
   label: `nav ${index + 1}`,
 }));
 
-const ImageBrowser = () => {
+const ImageBrowser = ({ handOver }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -19,14 +19,18 @@ const ImageBrowser = () => {
   const [totalFileCount, setTotalFileCount] = useState();
   const [subdirFileCount, setSubdirFileCount] = useState();
   const [currentImages, setCurrentImages] = useState([]);
+  const [payload, setPayload] = useState();
 
   useEffect(() => {
 
     const updateImages = async () => {
         if(activeSubdir) {
             const images = await getImagesFromDirectory(activeSubdir);
+            console.log(images[0]);
             setCurrentImages(images);
             setSubdirFileCount(images.length)
+            setPayload(images[0]);
+            handOver(images[0])
         }
     }
     updateImages()
@@ -103,10 +107,15 @@ const ImageBrowser = () => {
     await selectDirectory();
   }
 
+  const uploadOne = () => {
+    setActiveSubdir(items[0].dirEntry)
+  }
+
   return (
     <div>
     <Button style={{marginBottom: '10px'}} type="primary" onClick={showBrowser}>Select Folder</Button>
     {items && <h1> Folders : {folderCount}, Total Files : {totalFileCount} </h1>}
+    {items && <Button style={{marginBottom: '10px'}} type="primary" onClick={uploadOne}>Upload One</Button>}
     <Layout>
       {/* <Header
         style={{
