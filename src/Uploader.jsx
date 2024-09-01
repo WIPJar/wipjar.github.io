@@ -12,10 +12,8 @@ const Uploader = ( ) => {
     const { wipjarData, setFetchRequested, 
         updateData, resetLocalCache, appendExtractedData,
         fetchOne } = useContext(DataContext);
-
-    const [fileList, setFileList] = useState((wipjarData && wipjarData.uploadedFiles) || []);
+    const [fileList, setFileList] = useState((wipjarData && wipjarData.uploadedFiles && wipjarData.uploadedFiles.filter((file) => file.name)) || []);
     const [uploading, setUploading] = useState(false);
-
 
     const handleManualUpload = async (file) => {
         const formData = new FormData();
@@ -26,7 +24,8 @@ const Uploader = ( ) => {
                 'Content-Type': 'multipart/form-data',
             },
             });
-            appendExtractedData(response.data);
+            const responseData = JSON.parse(response.data.response)
+            appendExtractedData(responseData);
             message.success('File uploaded successfully');
         } catch (error) {
             console.error('Upload error', error);

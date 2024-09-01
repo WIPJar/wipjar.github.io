@@ -7,11 +7,12 @@ import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import ImageBrowser from './ImageBrowser';
 import Uploader from './Uploader';
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, MailOutlined, SettingOutlined, WechatWorkOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import * as XLSX from 'xlsx';
 import FileSaver from 'file-saver';
 import { DataProvider, DataContext } from './models/DataContext';
+import ChatPage from './ChatPage';
 
 const items = [
   {
@@ -25,7 +26,11 @@ const items = [
     key: 'process',
     icon: <AppstoreOutlined />,
   },
-]
+  {
+    label: 'Chat with data',
+    key: 'chat',
+    icon: <WechatWorkOutlined />,
+  },]
 
 const BASE_URL = "https://cogins.azurewebsites.net"
 // const BASE_URL = "http://localhost:8000"
@@ -57,7 +62,9 @@ const PdfUploader = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setExtractedText(response.data);
+      const responseData = JSON.parse(response.data.response)
+      console.log('---->', responseData)
+      setExtractedText(responseData);
       message.success('File uploaded successfully');
     } catch (error) {
       console.error('Upload error', error);
@@ -123,7 +130,7 @@ const PdfUploader = () => {
 
 function App() {
   const [count, setCount] = useState(0)
-  const [current, setCurrent] = useState('process');
+  const [current, setCurrent] = useState('batch');
   const [payload, setPayload] = useState();
 
   const onClick = (e) => {
@@ -148,7 +155,7 @@ function App() {
       <h1>WIPJar</h1>
       <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
       {
-        current === 'batch' ?  <Uploader /> : <PdfUploader />
+        current === 'batch' ?  <Uploader /> : (current === 'chat' ? <ChatPage onSwitch={() => {setCurrent('batch')}}/>: <PdfUploader />)
       }
       
     </DataProvider>
