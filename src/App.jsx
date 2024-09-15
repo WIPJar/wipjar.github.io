@@ -7,6 +7,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import ImageBrowser from './ImageBrowser';
 import Uploader from './Uploader';
+import PlaceAndDepartmentSelector from './PlaceAndDepartmentSelector';
 import { AppstoreOutlined, MailOutlined, SettingOutlined, WechatWorkOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import * as XLSX from 'xlsx';
@@ -30,7 +31,13 @@ const items = [
     label: 'Chat with data',
     key: 'chat',
     icon: <WechatWorkOutlined />,
-  },]
+  },
+  {
+    label: 'Explore',
+    key: 'explore',
+    icon: <AppstoreOutlined />,
+  },
+]
 
 const BASE_URL = "https://cogins.azurewebsites.net"
 // const BASE_URL = "http://localhost:8000"
@@ -155,7 +162,7 @@ function App() {
       <h1>WIPJar</h1>
       <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
       {
-        current === 'batch' ?  <Uploader /> : (current === 'chat' ? <ChatPage onSwitch={() => {setCurrent('batch')}}/>: <PdfUploader />)
+        current === 'batch' ?  <Uploader /> : (current === 'chat' ? <ChatPage onExplore={() => {setCurrent('explore')}} onSwitch={() => {setCurrent('batch')}}/>: current === 'explore' ? <PlaceAndDepartmentSelector goChat={() => {setCurrent('chat')}}/> : <PdfUploader />)
       }
       
     </DataProvider>

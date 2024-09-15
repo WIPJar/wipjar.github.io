@@ -69,6 +69,9 @@ const del = async (url, config) => {
   return response.data;
 };
 
+const getPlacesData = () => {
+  return get(`/wipplaces`)
+}
 // Example of a specific API call
 const getUserData = (userId) => {
   return get(`/users/${userId}`);
@@ -94,6 +97,7 @@ export const APIHelper = {
   put,
   delete: del,
   getUserData,
+  getPlacesData,
   getBackendIndex,
   searchTestName,
   submitForReview

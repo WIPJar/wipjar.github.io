@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Input, Button, Checkbox, Spin, Table, Segmented, Empty, Typography, message } from 'antd';
+import { Input, Button, Checkbox, Spin, Table, Segmented, Empty, Typography, message, Tag } from 'antd';
 import { Select, Space, Card, Badge, Popover } from 'antd';
 import { DataContext } from './models/DataContext';
 import axios from 'axios';
@@ -12,8 +12,22 @@ const handleFileChange = (value) => {
 
 const BASE_URL = "https://cogins.azurewebsites.net"
 // const BASE_URL = "http://localhost:8000"
+const { Title, Paragraph, Text, Link } = Typography;
 
-const ChatPage = ( {onSwitch} ) => {
+const EllipsisMiddle = ({
+  suffixCount,
+  children,
+}) => {
+  const start = children.slice(0, children.length - suffixCount);
+  const suffix = children.slice(-suffixCount).trim();
+  return (
+    <Text ellipsis={{ suffix }}>
+      {start}
+    </Text>
+  );
+};
+
+const ChatPage = ( {onSwitch, onExplore} ) => {
     const { wipjarData, setFetchRequested, askQuestion,
         updateData, resetLocalCache, resetChatHistory, appendExtractedData,
         fetchOne } = useContext(DataContext);
@@ -22,6 +36,7 @@ const ChatPage = ( {onSwitch} ) => {
   const [loading, setLoading] = useState((wipjarData && wipjarData.requestInProgress) || false);
   const [isTable, setIsTable] = useState(false);
   const [filenameOptions, setFilenameOptions] = useState([]);
+  const [exploreData, setExploreData] = useState();
   const [filename, setFilename] = useState();
 
 
@@ -40,6 +55,9 @@ const ChatPage = ( {onSwitch} ) => {
         if(successFiles.length && successFiles[0].name) {
             setFilename(successFiles[0].name)
         }
+    }
+    if(wipjarData && wipjarData.exploreData) {
+      setExploreData(wipjarData.exploreData)
     }
   }, [wipjarData])
 
@@ -64,7 +82,7 @@ const ChatPage = ( {onSwitch} ) => {
 
   useEffect(() => {
     console.log(wipjarData)
-    if(wipjarData && wipjarData.requestFinished) {
+    if(wipjarData && (wipjarData.requestFinished || wipjarData.keepAlive)) {
         setMessages(wipjarData.messages);
         setLoading(wipjarData.requestInProgress);
         if(wipjarData.requestFailed) {
@@ -75,34 +93,22 @@ const ChatPage = ( {onSwitch} ) => {
     }
   }, [wipjarData])
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async () => { 
     if (!inputMessage.trim()) return;
     setLoading(true);
     const updatedMessages = [...messages, { text: inputMessage, isUser: true }]
     setMessages(updatedMessages);
     setInputMessage('');
-    askQuestion(updatedMessages, filename, isTable)
-
-    // let response;
-    // try {
-    //     response = await askQuestion(updatedMessages)
-    //     const lastMessage = updatedMessages[updatedMessages.length - 1]
-    //     lastMessage.answered = true
-    //     console.log(response.table)
-    //     setMessages([...updatedMessages, { text: response.text.response || '', table: response.response || null, isUser: false }]);
-    // } catch(err) {
-    //     console.log(err)
-    //     response = {response: "Error"}
-    //     setMessages((prevState) => {
-    //         const lastMessage = prevState[prevState.length - 1]
-    //         lastMessage.failed = true
-    //         return [...prevState, { text: response.response || '', table: response.table || null, isUser: false }]
-    //     });
-    // }
-    // setLoading(false);
+    if(wipjarData.batch_ids) {
+      wipjarData.batch_ids.forEach((batch_id, idx) => {
+        askQuestion(updatedMessages, batch_id, isTable, idx+1 < wipjarData.batch_ids.length)
+      })
+    } else {
+      askQuestion(updatedMessages, filename, isTable)
+    }
   };
 
-  return filenameOptions.length ? (
+  return (filenameOptions.length || exploreData?.selectedDepartments) ? (
     <div style={{ padding: 20 }}>
       <div style={{ marginBottom: 10 }}>
       </div>
@@ -138,30 +144,63 @@ const ChatPage = ( {onSwitch} ) => {
         disabled={loading}
       />
       </Popover>
-      <div style={{ padding: 20, 
+      <div style={{ 
         display: 'flex',
-        // flexDirection: 'row-reverse', 
-        justifyContent: 'space-around' ,
+        flexDirection: 'column', 
+        // justifyContent: 'space-around' ,
         border: '2px dashed grey'
         }}>
+<div style={{ padding: 20, 
+        display: 'flex',
+        // flexDirection: 'row-reverse', 
+        justifyContent: 'space-around',
+        alignItems: 'center'
+        }}>
+          <div style={{ 
+        display: 'flex',
+        flexDirection: 'row', 
+        }}>
+          <Text style={{ marginRight: 10 }}>Exploring </Text>
+          <Tag color="#87d068" style={{ width: 'fit-content' }}>{exploreData.selectedPlaces}</Tag>
+          {exploreData.selectedDepartments && <EllipsisMiddle suffixCount={12}>
+    {exploreData.selectedDepartments.toString()}
+  </EllipsisMiddle>
+}
+    </div>
+    </div>
+<div style={{ padding: 10, 
+        display: 'flex',
+        // flexDirection: 'row-reverse', 
+        justifyContent: 'space-around',
+        alignItems: 'center'
+        }}>
+          <div style={{ 
+        display: 'flex',
+        flexDirection: 'column', 
+        }}>
+          <Text>Uploaded Files</Text>
       <Select
-      defaultValue={wipjarData.uploadedFiles[0].name}
+      defaultValue={wipjarData.uploadedFiles[0]?.name}
       style={{ width: 400 }}
       onChange={handleFileChange}
       options={filenameOptions}
     />  
+    </div>
     <Segmented
     options={['Text', {label: 'Table', disabled: true}]}
     onChange={(value) => {
         setIsTable(value === 'Table'); // string
     }}
     />
-          <Button onClick={() => {
+    <Button onClick={() => {
             setMessages([]);
             setLoading(false);
         resetChatHistory()
-    }}>Clear Chat</Button>
+    }}>
+      Clear Chat
+    </Button>
     <Button type="primary" onClick={handleSendMessage}>Send</Button>
+    </div>
     </div>
     </div>
   ): (<Empty
@@ -176,6 +215,8 @@ const ChatPage = ( {onSwitch} ) => {
     }
   >
     <Button type="primary" onClick={onSwitch}>Upload Files</Button>
+    <p> OR </p>
+    <Button type="primary" onClick={onExplore}>Explore</Button>
   </Empty>)
 };
 

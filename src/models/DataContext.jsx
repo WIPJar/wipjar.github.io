@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const BASE_URL = "https://cogins.azurewebsites.net"
-// const BASE_URL = "http://localhost:8000"
+// const BASE_URL = "https://cogins.azurewebsites.net"
+const BASE_URL = "http://localhost:8000"
 
 export const DataContext = createContext();
 
@@ -25,7 +25,7 @@ export const DataProvider = ({ children }) => {
     }));
   };
 
-  const askQuestion = async (messages, filename, isTable) => {
+  const askQuestion = async (messages, filename, isTable, keepAlive=false) => {
     const question = messages[messages.length - 1].text
     const formData = new FormData();
     formData.append('key', filename);
@@ -38,14 +38,14 @@ export const DataProvider = ({ children }) => {
         //     'Content-Type': 'multipart/form-data',
         // },
         });
-        console.log(response.data)
+        console.log('----->', response.data)
         const res = {
             text: response.data,
             table: response.data 
         }
         const lastMessage = messages[messages.length - 1]
         lastMessage.answered = true
-        console.log(response.table)
+        console.log('--->', response.table)
         updateData('messages', [...messages, { text: res.text.response || '', table: res.response || null, isUser: false }]);
         // return res
     } catch (error) {
@@ -60,8 +60,12 @@ export const DataProvider = ({ children }) => {
         updateData('requestFailed', true)
         throw Error("Upload failed")
     } finally {
-      updateData('requestFinished', true)
-      updateData('requestInProgress', false)
+      if(!keepAlive) {
+        updateData('requestFinished', true)
+        updateData('requestInProgress', false)
+      } else {
+        updateData('keepAlive', keepAlive)
+      }
     }
   }
 
