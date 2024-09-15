@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// const BASE_URL = "https://cogins.azurewebsites.net"
-const BASE_URL = "http://localhost:8000"
+const BASE_URL = "https://cogins.azurewebsites.net"
+// const BASE_URL = "http://localhost:8000"
 
 export const DataContext = createContext();
 
