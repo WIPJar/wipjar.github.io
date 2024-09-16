@@ -166,7 +166,7 @@ const PlaceAndDepartmentSelector = ({goChat}) => {
       >
       </Select>
       {
-        selectedPlaces?.length && selectedDepartments?.length &&
+        selectedPlaces?.length && selectedDepartments?.length ? 
         <Segmented
         style={{ marginTop: 10 }}
         value={selectedTime}
@@ -174,7 +174,7 @@ const PlaceAndDepartmentSelector = ({goChat}) => {
         onChange={(value) => {
             setSelectedTime(value)
         }}
-      />
+      /> : <></>
       }
     {
     selectedTime && <Button 
@@ -182,15 +182,6 @@ const PlaceAndDepartmentSelector = ({goChat}) => {
     type="primary" 
     onClick={onExplore}>Start exploring</Button>
     }
-      <p>
-      {
-        selectedPlaces && selectedPlaces.map((place) => {
-            return selectedDepartments.map((dept) => {
-                return `${place}/${dept}/${selectedTime}`
-            })
-        })
-      }
-      </p>
     </div>
   );
 };

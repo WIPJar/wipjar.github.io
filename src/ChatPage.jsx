@@ -159,7 +159,7 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
         display: 'flex',
         flexDirection: 'row', 
         }}>
-          <Text style={{ marginRight: 10 }}>Exploring </Text>
+          <Text style={{ marginRight: 10 }}>Exploring {exploreData?.selectedTime}</Text>
           <Tag color="#87d068" style={{ width: 'fit-content' }}>{exploreData.selectedPlaces}</Tag>
           {exploreData.selectedDepartments && <EllipsisMiddle suffixCount={12}>
     {exploreData.selectedDepartments.toString()}
