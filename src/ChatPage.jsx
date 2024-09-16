@@ -143,7 +143,7 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
           </div>
         ))}
         {loading && <div>
-          {`${batchPct}%`}
+          {`${batchPct.toFixed(1)}%`}
           <Spin tip="Typing..." />
         </div>}
       </div>
