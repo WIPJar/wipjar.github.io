@@ -29,12 +29,12 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
         fetchOne } = useContext(DataContext);
   const [messages, setMessages] = useState((wipjarData && wipjarData.messages) || []);
   const [inputMessage, setInputMessage] = useState('');
-  const [loading, setLoading] = useState((wipjarData && wipjarData.requestInProgress) || false);
+  const [loading, setLoading] = useState((wipjarData && wipjarData.requestData?.requestInProgress) || false);
   const [isTable, setIsTable] = useState(false);
   const [filenameOptions, setFilenameOptions] = useState([]);
   const [exploreData, setExploreData] = useState();
   const [filename, setFilename] = useState();
-
+  const [batchPct, setBatchPct] = useState(0);
 
   const handleFileChange = (value) => {
     console.log(value)
@@ -81,16 +81,23 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
 
   useEffect(() => {
     console.log(wipjarData)
-    if(wipjarData && (wipjarData.requestFinished || wipjarData.keepAlive)) {
-        setMessages(wipjarData.messages);
-        setLoading(wipjarData.requestInProgress);
-        if(wipjarData.requestFailed) {
+    const requestData = wipjarData.requestData
+    if(requestData && (requestData.requestFinished || requestData.keepAlive)) {
+        if(requestData.updateMessages) {
+          console.log('updating mes')
+          setMessages(wipjarData.messages || [])
+        };
+        setLoading(requestData.requestInProgress || requestData.keepAlive);
+        if(requestData.requestFailed) {
             message.error('Chat failed');
-            updateData('requestFinished', false)
-            updateData('requestFailed', false)
+            updateData('requestData', {
+              ...requestData,
+              requestFinished: false,
+              requestFailed: false 
+            })
         }
     }
-  }, [wipjarData])
+  }, [wipjarData.requestData])
 
   const handleSendMessage = async () => { 
     if (!inputMessage.trim()) return;
@@ -99,9 +106,13 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
     setMessages(updatedMessages);
     setInputMessage('');
     if(wipjarData.batch_ids) {
-      wipjarData.batch_ids.forEach((batch_id, idx) => {
-        askQuestion(updatedMessages, batch_id, isTable, idx+1 < wipjarData.batch_ids.length)
-      })
+      let idx = 0
+      for (const batch_id of wipjarData.batch_ids) {
+        setBatchPct(100 * idx * (1/wipjarData.batch_ids.length))
+        await askQuestion(updatedMessages, batch_id, isTable, idx+1 < wipjarData.batch_ids.length)
+        idx += 1
+      }
+      setBatchPct(0)
     } else {
       askQuestion(updatedMessages, filename, isTable)
     }
@@ -112,7 +123,7 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
       <div style={{ marginBottom: 10 }}>
       </div>
       <div style={{ height: '300px', overflowY: 'auto', border: '1px solid #ccc', padding: 10, marginBottom: 10 }}>
-        {messages.map((msg, index) => (
+        {messages && messages.map((msg, index) => (
           <div key={index} style={{
             textAlign: msg.isUser ? 'right' : 'left' 
             }}>
@@ -131,7 +142,10 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
             </Badge.Ribbon>
           </div>
         ))}
-        {loading && <Spin tip="Typing..." />}
+        {loading && <div>
+          {`${batchPct}%`}
+          <Spin tip="Typing..." />
+        </div>}
       </div>
       <Popover content="Hint: Try something like 'Can you list out all the people that spoke and if they were annoyed or happy with anything?'" open={messages.length === 0 && !inputMessage}>
       <Input

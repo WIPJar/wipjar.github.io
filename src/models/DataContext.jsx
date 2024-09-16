@@ -31,7 +31,8 @@ export const DataProvider = ({ children }) => {
     formData.append('key', filename);
     formData.append('question', question)
     formData.append('is_table', isTable);
-    console.log(filename,question, isTable)
+    console.log('here', filename,question, isTable);
+    const requestData = {}
     try {
         const response = await axios.post(BASE_URL+'/chat', formData, {
         // headers: {
@@ -46,7 +47,9 @@ export const DataProvider = ({ children }) => {
         const lastMessage = messages[messages.length - 1]
         lastMessage.answered = true
         console.log('--->', response.table)
-        updateData('messages', [...messages, { text: res.text.response || '', table: res.response || null, isUser: false }]);
+        updateData('messages', (prevState) => {
+          return [...prevState, { text: res.text.response || '', table: res.response || null, isUser: false }]
+        });
         // return res
     } catch (error) {
         console.error('Upload error', error);
@@ -57,15 +60,17 @@ export const DataProvider = ({ children }) => {
             lastMessage.failed = true
             return [...prevState, { text: response.response || '', table: response.table || null, isUser: false }]
         });
-        updateData('requestFailed', true)
+        requestData['requestFailed'] = true
         throw Error("Upload failed")
     } finally {
+      requestData['updateMessages'] = true
       if(!keepAlive) {
-        updateData('requestFinished', true)
-        updateData('requestInProgress', false)
+        requestData['requestFinished'] = true
+        requestData['requestInProgress'] = false 
       } else {
-        updateData('keepAlive', keepAlive)
+        requestData['keepAlive'] = keepAlive       
       }
+      updateData('requestData', requestData)
     }
   }
 

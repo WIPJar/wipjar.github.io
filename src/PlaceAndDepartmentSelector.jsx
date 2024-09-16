@@ -62,7 +62,7 @@ const PlaceAndDepartmentSelector = ({goChat}) => {
 
   const BASE_URL = "https://cogins.azurewebsites.net"
 
-//   const BASE_URL = "http://localhost:8000"
+  // const BASE_URL = "http://localhost:8000"
 
 
   const handlePlaceChange = (values) => {
