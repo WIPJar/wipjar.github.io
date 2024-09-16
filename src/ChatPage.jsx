@@ -36,7 +36,10 @@ const ChatPage = ( {onSwitch, onExplore} ) => {
   const [filename, setFilename] = useState();
 
 
-
+  const handleFileChange = (value) => {
+    console.log(value)
+    setFilename('--->', value);
+  };
 
   useEffect(() => {
     if(wipjarData && wipjarData.uploadedFiles.length) {
