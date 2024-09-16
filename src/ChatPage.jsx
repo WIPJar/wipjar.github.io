@@ -5,10 +5,6 @@ import { DataContext } from './models/DataContext';
 import axios from 'axios';
 import Markdown from 'react-markdown'
 
-const handleFileChange = (value) => {
-    console.log(value)
-    setFilename('--->', value);
-};
 
 const BASE_URL = "https://cogins.azurewebsites.net"
 // const BASE_URL = "http://localhost:8000"
